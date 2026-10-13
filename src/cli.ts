@@ -3,12 +3,13 @@ import { readFile } from "node:fs/promises";
 import { stdin } from "node:process";
 import { generateTypeScript } from "./jsonshape";
 
-const usage = "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--help] FILE...";
+const usage = "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...";
 
 interface CliOptions {
   name: string;
   readonly: boolean;
   type: boolean;
+  ndjson: boolean;
   files: string[];
   help: boolean;
 }
@@ -18,6 +19,7 @@ function parseArgs(args: string[]): CliOptions {
     name: "Root",
     readonly: false,
     type: false,
+    ndjson: false,
     files: [],
     help: false,
   };
@@ -26,6 +28,7 @@ function parseArgs(args: string[]): CliOptions {
     if (arg === "--help") options.help = true;
     else if (arg === "--readonly") options.readonly = true;
     else if (arg === "--type") options.type = true;
+    else if (arg === "--ndjson") options.ndjson = true;
     else if (arg === "--name") {
       const value = args[index + 1];
       if (value === undefined || value.startsWith("--")) throw new Error("--name needs a value");
@@ -78,6 +81,23 @@ async function main(): Promise<void> {
       return;
     }
     if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    if (options.ndjson) {
+      const lines = text.split("\n");
+      for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index];
+        if (/^[ \t\r]*$/.test(line)) continue;
+        try {
+          documents.push(JSON.parse(line));
+        } catch (error) {
+          console.error(
+            `jsonshape: ${displayPath}:${index + 1}: invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          process.exitCode = 1;
+          return;
+        }
+      }
+      continue;
+    }
     try {
       documents.push(JSON.parse(text));
     } catch (error) {
@@ -87,6 +107,12 @@ async function main(): Promise<void> {
       process.exitCode = 1;
       return;
     }
+  }
+
+  if (options.ndjson && documents.length === 0) {
+    console.error("jsonshape: no JSON values found");
+    process.exitCode = 1;
+    return;
   }
 
   try {

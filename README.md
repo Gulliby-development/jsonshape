@@ -19,7 +19,7 @@ The package exposes a `jsonshape` executable. In a checkout, run it with `bun ru
 ## Usage
 
 ```text
-jsonshape [--name ROOT] [--readonly] [--type] [--help] FILE...
+jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...
 ```
 
 Pass one or more JSON files. Use `-` for standard input. Options can appear before or after file names. The default root name is `Root`; custom names must begin with an uppercase ASCII letter and contain only ASCII letters and digits.
@@ -42,6 +42,34 @@ bun run src/cli.ts sample.json --type
 - An object root produces an exported interface, or an exported object type with `--type`. Non-object roots produce an exported type alias; objects inside root arrays are named with an `Item` suffix. Mixing object and non-object roots is an error.
 - Nested object names come from maximal runs of ASCII letters and digits in the key. Split a run where a lowercase letter or digit is followed by an uppercase letter, capitalize the first character of each resulting word, and keep its remaining characters unchanged: `user_name` and `userName` become `UserName`, `v2` becomes `V2`, and `2fa` stays `2fa`. Punctuation and non-ASCII characters are separators; a key with no words adds nothing. An object reached through one or more array layers adds `Item` once. Duplicate generated names receive suffixes `2`, `3`, and so on in print order. Identifier-like property keys are bare; other keys use JSON string quoting.
 - Declarations are printed parent-first, with children depth-first in first-seen key order. Properties have two-space indentation and trailing semicolons; declarations have a blank line between them.
+
+## NDJSON input
+
+With `--ndjson`, jsonshape reads each input as JSON Lines, parsing each non-blank line as one sample. For example, `events.ndjson`:
+
+```text
+{"id":1,"tags":["a"]}
+
+{"id":2,"name":"x"}
+```
+
+Run:
+
+```sh
+bun run src/cli.ts --ndjson events.ndjson
+```
+
+Output:
+
+```ts
+export interface Root {
+  id: number;
+  tags?: string[];
+  name?: string;
+}
+```
+
+Blank lines are skipped. Invalid-line errors identify the source and physical line as `FILE:LINE`. An input with no value is allowed if another supplied input has values; if all supplied inputs yield no values, jsonshape reports `no JSON values found`.
 
 ## Examples
 
@@ -111,7 +139,7 @@ export interface Root {
 ## Exit codes
 
 - `0`: successful generation or `--help`.
-- `1`: unreadable input, invalid JSON, or mixed object and non-object roots.
+- `1`: unreadable input, invalid JSON, no JSON values, or mixed object and non-object roots.
 - `2`: usage error, such as no input files, an unknown option, or an invalid/missing root name.
 
 Errors are written to standard error with the `jsonshape: ` prefix. Inputs are read and parsed before declarations are written, so a failed input does not produce partial output.
@@ -134,6 +162,7 @@ bun test
 | `--name ROOT` | Root declaration name (default `Root`; uppercase ASCII letter, then ASCII letters and digits). |
 | `--readonly` | Mark properties readonly and use readonly array types. |
 | `--type` | Emit type aliases instead of interfaces. |
+| `--ndjson` | Read every input as JSON Lines: one sample per non-blank line. |
 | `--help` | Print usage information. |
 | `-` | Read one sample from standard input. |
 

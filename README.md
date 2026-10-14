@@ -19,7 +19,7 @@ The package exposes a `jsonshape` executable. In a checkout, run it with `bun ru
 ## Usage
 
 ```text
-jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...
+jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...
 ```
 
 Pass one or more JSON files. Use `-` for standard input. Options can appear before or after file names. The default root name is `Root`; custom names must begin with an uppercase ASCII letter and contain only ASCII letters and digits.
@@ -70,6 +70,34 @@ export interface Root {
 ```
 
 Blank lines are skipped. Invalid-line errors identify the source and physical line as `FILE:LINE`. An input with no value is allowed if another supplied input has values; if all supplied inputs yield no values, jsonshape reports `no JSON values found`.
+
+## Indentation
+
+`--indent N|tab` sets the indentation of the properties: N is a single digit from 1 to 8 (that many spaces) or the word `tab` (one tab character). The default is two spaces. Only property lines change; declaration lines and the blank lines between declarations stay as they are. When the option is repeated, the last one wins. A missing value (the last argument, or a next argument starting with `--`) is the usage error `--indent needs a value`; any other value is the usage error `invalid --indent: VALUE`. For example, `sample.json`:
+
+```json
+{"id":1,"tags":["a"],"address":{"city":"X"}}
+```
+
+Run:
+
+```sh
+bun run src/cli.ts --indent 4 sample.json
+```
+
+Output:
+
+```ts
+export interface Root {
+    id: number;
+    tags: string[];
+    address: RootAddress;
+}
+
+export interface RootAddress {
+    city: string;
+}
+```
 
 ## Examples
 
@@ -163,6 +191,7 @@ bun test
 | `--readonly` | Mark properties readonly and use readonly array types. |
 | `--type` | Emit type aliases instead of interfaces. |
 | `--ndjson` | Read every input as JSON Lines: one sample per non-blank line. |
+| `--indent N\|tab` | Indent properties with N spaces (1 to 8) or one tab; default two spaces. |
 | `--help` | Print usage information. |
 | `-` | Read one sample from standard input. |
 

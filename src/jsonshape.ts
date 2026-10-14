@@ -2,6 +2,7 @@ export interface RenderOptions {
   name?: string;
   readonly?: boolean;
   type?: boolean;
+  indent?: string;
 }
 
 type Kind = "string" | "number" | "boolean" | "null" | "object" | "array";
@@ -125,7 +126,7 @@ function renderObject(shape: Shape, names: Map<Shape, string>, options: RenderOp
   const lines = [...shape.properties].map(([key, property]) => {
     const optional = property.present < shape.occurrences ? "?" : "";
     const readonly = options.readonly ? "readonly " : "";
-    return `  ${readonly}${propertyName(key)}${optional}: ${renderType(property.shape, names, options)};`;
+    return `${options.indent ?? "  "}${readonly}${propertyName(key)}${optional}: ${renderType(property.shape, names, options)};`;
   });
   if (options.type)
     return `export type ${name} = {${lines.length ? `\n${lines.join("\n")}\n` : ""}};`;

@@ -49,7 +49,7 @@ describe("jsonshape CLI", () => {
     });
     expect(result.exitCode).toBe(0);
     expect(result.stdout.toString()).toBe(
-      "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...\n",
+      "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...\n",
     );
     expect(result.stderr.toString()).toBe("");
   });
@@ -95,7 +95,7 @@ describe("jsonshape CLI", () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toBe(
-      "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...\n",
+      "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...\n",
     );
     expect(result.stderr).toBe("");
   });

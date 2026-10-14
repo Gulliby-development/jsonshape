@@ -3,13 +3,15 @@ import { readFile } from "node:fs/promises";
 import { stdin } from "node:process";
 import { generateTypeScript } from "./jsonshape";
 
-const usage = "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...";
+const usage =
+  "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...";
 
 interface CliOptions {
   name: string;
   readonly: boolean;
   type: boolean;
   ndjson: boolean;
+  indent: string;
   files: string[];
   help: boolean;
 }
@@ -20,6 +22,7 @@ function parseArgs(args: string[]): CliOptions {
     readonly: false,
     type: false,
     ndjson: false,
+    indent: "  ",
     files: [],
     help: false,
   };
@@ -29,7 +32,14 @@ function parseArgs(args: string[]): CliOptions {
     else if (arg === "--readonly") options.readonly = true;
     else if (arg === "--type") options.type = true;
     else if (arg === "--ndjson") options.ndjson = true;
-    else if (arg === "--name") {
+    else if (arg === "--indent") {
+      const value = args[index + 1];
+      if (value === undefined || value.startsWith("--")) throw new Error("--indent needs a value");
+      index += 1;
+      if (value === "tab") options.indent = "\t";
+      else if (/^[1-8]$/.test(value)) options.indent = " ".repeat(Number(value));
+      else throw new Error(`invalid --indent: ${value}`);
+    } else if (arg === "--name") {
       const value = args[index + 1];
       if (value === undefined || value.startsWith("--")) throw new Error("--name needs a value");
       index += 1;

@@ -288,7 +288,8 @@ describe("jsonshape NDJSON input", () => {
 
     expect(help).toEqual({
       exitCode: 0,
-      stdout: "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...\n",
+      stdout:
+        "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...\n",
       stderr: "",
     });
     expect(invalidFlag).toEqual({
@@ -308,7 +309,7 @@ describe("jsonshape NDJSON input", () => {
     const section = readme.slice(sectionStart, examplesStart);
 
     expect(readme).toContain(
-      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--help] FILE...",
+      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...",
     );
     expect(readme).toContain(
       "| `--ndjson` | Read every input as JSON Lines: one sample per non-blank line. |",

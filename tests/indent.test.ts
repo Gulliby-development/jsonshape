@@ -218,7 +218,7 @@ describe("configurable indentation", () => {
       .replace(/\r\n/g, "\n")
       .replace(/[ \t]+$/gm, "");
     const usage =
-      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...";
+      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...";
     const optionRow =
       "| `--indent N\\|tab` | Indent properties with N spaces (1 to 8) or one tab; default two spaces. |";
     const ndjsonRow =

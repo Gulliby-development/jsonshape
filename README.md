@@ -19,7 +19,7 @@ The package exposes a `jsonshape` executable. In a checkout, run it with `bun ru
 ## Usage
 
 ```text
-jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--help] FILE...
+jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...
 ```
 
 Pass one or more JSON files. Use `-` for standard input. Options can appear before or after file names. The default root name is `Root`; custom names must begin with an uppercase ASCII letter and contain only ASCII letters and digits.
@@ -70,6 +70,36 @@ export interface Root {
 ```
 
 Blank lines are skipped. Invalid-line errors identify the source and physical line as `FILE:LINE`. An input with no value is allowed if another supplied input has values; if all supplied inputs yield no values, jsonshape reports `no JSON values found`.
+
+## Sample values
+
+`--examples` adds a comment ` // e.g. VALUE` at the end of a property line. VALUE is the JSON text of the first string, number or boolean that appeared directly as the value of that property, in input order across all samples (elements of arrays are not used). A property whose merged type has no such value (objects, arrays, null) gets no comment, and neither does one whose JSON text is longer than 30 characters or contains U+2028 or U+2029. The option takes no value, may stand anywhere among the arguments, and changes nothing else in the output. For example, `sample.json`:
+
+```json
+{"id":1,"name":"Ann","tags":["a"],"address":{"city":"X"},"bio":"a rather long text of more than thirty characters"}
+```
+
+Run:
+
+```sh
+bun run src/cli.ts --examples sample.json
+```
+
+Output:
+
+```ts
+export interface Root {
+  id: number; // e.g. 1
+  name: string; // e.g. "Ann"
+  tags: string[];
+  address: RootAddress;
+  bio: string;
+}
+
+export interface RootAddress {
+  city: string; // e.g. "X"
+}
+```
 
 ## Indentation
 
@@ -192,6 +222,7 @@ bun test
 | `--type` | Emit type aliases instead of interfaces. |
 | `--ndjson` | Read every input as JSON Lines: one sample per non-blank line. |
 | `--indent N\|tab` | Indent properties with N spaces (1 to 8) or one tab; default two spaces. |
+| `--examples` | Add an `// e.g. VALUE` comment with a sample value to properties that have one. |
 | `--help` | Print usage information. |
 | `-` | Read one sample from standard input. |
 

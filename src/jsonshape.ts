@@ -3,6 +3,7 @@ export interface RenderOptions {
   readonly?: boolean;
   type?: boolean;
   indent?: string;
+  examples?: boolean;
 }
 
 type Kind = "string" | "number" | "boolean" | "null" | "object" | "array";
@@ -10,7 +11,7 @@ type Kind = "string" | "number" | "boolean" | "null" | "object" | "array";
 interface Shape {
   kinds: Set<Kind>;
   occurrences: number;
-  properties: Map<string, { shape: Shape; present: number }>;
+  properties: Map<string, { shape: Shape; present: number; example?: string | number | boolean }>;
   element?: Shape;
 }
 
@@ -42,7 +43,16 @@ function addValue(shape: Shape, value: unknown): void {
         shape.properties.set(key, property);
       }
       property.present += 1;
-      addValue(property.shape, record[key]);
+      const propertyValue = record[key];
+      if (
+        property.example === undefined &&
+        (typeof propertyValue === "string" ||
+          typeof propertyValue === "number" ||
+          typeof propertyValue === "boolean")
+      ) {
+        property.example = propertyValue;
+      }
+      addValue(property.shape, propertyValue);
     }
     return;
   }
@@ -126,7 +136,18 @@ function renderObject(shape: Shape, names: Map<Shape, string>, options: RenderOp
   const lines = [...shape.properties].map(([key, property]) => {
     const optional = property.present < shape.occurrences ? "?" : "";
     const readonly = options.readonly ? "readonly " : "";
-    return `${options.indent ?? "  "}${readonly}${propertyName(key)}${optional}: ${renderType(property.shape, names, options)};`;
+    const example =
+      options.examples && property.example !== undefined
+        ? JSON.stringify(property.example)
+        : undefined;
+    const exampleComment =
+      example !== undefined &&
+      example.length <= 30 &&
+      !example.includes("\u2028") &&
+      !example.includes("\u2029")
+        ? ` // e.g. ${example}`
+        : "";
+    return `${options.indent ?? "  "}${readonly}${propertyName(key)}${optional}: ${renderType(property.shape, names, options)};${exampleComment}`;
   });
   if (options.type)
     return `export type ${name} = {${lines.length ? `\n${lines.join("\n")}\n` : ""}};`;

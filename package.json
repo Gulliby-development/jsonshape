@@ -6,6 +6,10 @@
   "bin": {
     "jsonshape": "src/cli.ts"
   },
+  "files": [
+    "src/cli.ts",
+    "src/jsonshape.ts"
+  ],
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",

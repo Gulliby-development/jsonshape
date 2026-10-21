@@ -16,6 +16,8 @@ bun install
 
 The package exposes a `jsonshape` executable. In a checkout, run it with `bun run src/cli.ts`.
 
+`bun pm pack` packs only `src/cli.ts`, `src/jsonshape.ts`, `package.json`, `README.md` and `LICENSE`; the tests are left out.
+
 ## Usage
 
 ```text

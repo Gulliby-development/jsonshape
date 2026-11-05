@@ -21,7 +21,7 @@ The package exposes a `jsonshape` executable. In a checkout, run it with `bun ru
 ## Usage
 
 ```text
-jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...
+jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--sort-keys] [--help] FILE...
 ```
 
 Pass one or more JSON files. Use `-` for standard input. Options can appear before or after file names. The default root name is `Root`; custom names must begin with an uppercase ASCII letter and contain only ASCII letters and digits.
@@ -33,12 +33,12 @@ bun run src/cli.ts --name ApiResponse --readonly sample.json
 bun run src/cli.ts sample.json --type
 ```
 
-`--readonly` marks every property readonly and uses readonly array types. `--type` emits type aliases instead of interfaces. `--help` prints usage information.
+`--readonly` marks every property readonly and uses readonly array types. `--type` emits type aliases instead of interfaces. `--sort-keys` lists the properties of every object in alphabetical order of their keys (by UTF-16 code unit, so `B` comes before `a` and `a10` before `a2`) instead of first-seen order; the child declarations follow the same order. `--help` prints usage information.
 
 ## Rules
 
 - jsonshape recognizes strings, numbers, booleans, null, objects, and arrays. Values at the same position across samples are merged; array elements share one position.
-- Object keys appear in first-seen order. A key is optional if it is missing from any occurrence of that object. Null is a value, not a missing key. Nested keys are assessed only where their parent exists. Special keys such as `__proto__` and `constructor` are ordinary keys.
+- Object keys appear in first-seen order, or in alphabetical order with `--sort-keys`. A key is optional if it is missing from any occurrence of that object. Null is a value, not a missing key. Nested keys are assessed only where their parent exists. Special keys such as `__proto__` and `constructor` are ordinary keys.
 - Unions use this order: string, number, boolean, null, object type, array type. Each kind appears once.
 - Array element types merge across samples. Arrays empty in every sample use `unknown[]`; union elements are parenthesized, and nested arrays keep their nesting.
 - An object root produces an exported interface, or an exported object type with `--type`. Non-object roots produce an exported type alias; objects inside root arrays are named with an `Item` suffix. Mixing object and non-object roots is an error.
@@ -225,6 +225,7 @@ bun test
 | `--ndjson` | Read every input as JSON Lines: one sample per non-blank line. |
 | `--indent N\|tab` | Indent properties with N spaces (1 to 8) or one tab; default two spaces. |
 | `--examples` | Add an `// e.g. VALUE` comment with a sample value to properties that have one. |
+| `--sort-keys` | List the properties of every object in alphabetical order of their keys. |
 | `--help` | Print usage information. |
 | `-` | Read one sample from standard input. |
 

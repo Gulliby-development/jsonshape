@@ -4,6 +4,7 @@ export interface RenderOptions {
   type?: boolean;
   indent?: string;
   examples?: boolean;
+  sortKeys?: boolean;
 }
 
 type Kind = "string" | "number" | "boolean" | "null" | "object" | "array";
@@ -96,9 +97,18 @@ function renderType(shape: Shape, names: Map<Shape, string>, options: RenderOpti
   return members.join(" | ") || "unknown";
 }
 
+function propertyEntries(shape: Shape, options: RenderOptions) {
+  const entries = [...shape.properties];
+  if (options.sortKeys) {
+    entries.sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0));
+  }
+  return entries;
+}
+
 function collectDeclarations(
   root: Shape,
   rootName: string,
+  options: RenderOptions,
 ): {
   names: Map<Shape, string>;
   declarations: Shape[];
@@ -119,7 +129,7 @@ function collectDeclarations(
     if (shape.kinds.has("object")) {
       const objectName = isRoot ? rootName : `${name}${throughArray ? "Item" : ""}`;
       assign(shape, objectName);
-      for (const [key, property] of shape.properties) {
+      for (const [key, property] of propertyEntries(shape, options)) {
         walk(property.shape, `${names.get(shape)}${pascalWords(key)}`, false, false);
       }
     }
@@ -133,7 +143,7 @@ function collectDeclarations(
 
 function renderObject(shape: Shape, names: Map<Shape, string>, options: RenderOptions): string {
   const name = names.get(shape) ?? "Root";
-  const lines = [...shape.properties].map(([key, property]) => {
+  const lines = propertyEntries(shape, options).map(([key, property]) => {
     const optional = property.present < shape.occurrences ? "?" : "";
     const readonly = options.readonly ? "readonly " : "";
     const example =
@@ -164,7 +174,7 @@ export function generateTypeScript(documents: unknown[], options: RenderOptions 
   }
 
   const rootName = options.name ?? "Root";
-  const { names, declarations } = collectDeclarations(root, rootName);
+  const { names, declarations } = collectDeclarations(root, rootName, options);
   const output = declarations.map((shape) => renderObject(shape, names, options));
   if (!root.kinds.has("object")) {
     output.push(`export type ${rootName} = ${renderType(root, names, options)};`);

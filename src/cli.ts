@@ -4,7 +4,7 @@ import { stdin } from "node:process";
 import { generateTypeScript } from "./jsonshape";
 
 const usage =
-  "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...";
+  "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--sort-keys] [--help] FILE...";
 
 interface CliOptions {
   name: string;
@@ -13,6 +13,7 @@ interface CliOptions {
   ndjson: boolean;
   indent: string;
   examples: boolean;
+  sortKeys: boolean;
   files: string[];
   help: boolean;
 }
@@ -25,6 +26,7 @@ function parseArgs(args: string[]): CliOptions {
     ndjson: false,
     indent: "  ",
     examples: false,
+    sortKeys: false,
     files: [],
     help: false,
   };
@@ -35,6 +37,7 @@ function parseArgs(args: string[]): CliOptions {
     else if (arg === "--type") options.type = true;
     else if (arg === "--ndjson") options.ndjson = true;
     else if (arg === "--examples") options.examples = true;
+    else if (arg === "--sort-keys") options.sortKeys = true;
     else if (arg === "--indent") {
       const value = args[index + 1];
       if (value === undefined || value.startsWith("--")) throw new Error("--indent needs a value");

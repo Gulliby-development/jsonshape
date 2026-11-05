@@ -458,7 +458,7 @@ describe("optional property examples", () => {
     expect(runCli(["--help"])).toEqual({
       exitCode: 0,
       stdout:
-        "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...\n",
+        "Usage: jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--sort-keys] [--help] FILE...\n",
       stderr: "",
     });
   });
@@ -491,13 +491,15 @@ describe("optional property examples", () => {
   test("documents the exact usage, option row, and section order", () => {
     const markdown = readReadme();
     const usage =
-      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--help] FILE...";
+      "jsonshape [--name ROOT] [--readonly] [--type] [--ndjson] [--indent N|tab] [--examples] [--sort-keys] [--help] FILE...";
     const option =
       "| `--examples` | Add an `// e.g. VALUE` comment with a sample value to properties that have one. |";
+    const sortOption =
+      "| `--sort-keys` | List the properties of every object in alphabetical order of their keys. |";
     const helpOption = "| `--help` | Print usage information. |";
 
     expect(markdown).toContain(lines(["## Usage", "", "```text", usage, "```"]));
-    expect(markdown).toContain(`${option}\n${helpOption}`);
+    expect(markdown).toContain(`${option}\n${sortOption}\n${helpOption}`);
     expect(markdown.indexOf("## NDJSON input")).toBeLessThan(markdown.indexOf("## Sample values"));
     expect(markdown.indexOf("## Sample values")).toBeLessThan(markdown.indexOf("## Indentation"));
     expect(markdown.indexOf("## Indentation")).toBeLessThan(markdown.indexOf("## Examples"));
